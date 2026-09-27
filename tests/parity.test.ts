@@ -1,14 +1,24 @@
 /* Parity: the TypeScript port must behave exactly like the prototype (build step 1 is a
    no-behavior-change port). Each scenario runs against both engines with the same seed and
    clock, and the full stored state and every returned payload must match.
-   When a later PR changes behavior on purpose, retire the affected scenario here. */
+   When a later PR changes behavior on purpose, either run the port in a legacy setting that
+   reproduces the prototype (below) or retire the affected scenario.
+
+   Intentional divergences, reproduced here with legacy settings:
+   - GOT_IT_MIN_SESSIONS (2026-09-26): the prototype behaves as if it were 1. */
 import { createRequire } from 'node:module';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as TS from '../src/engine';
 
 const require = createRequire(import.meta.url);
 require('../prototype/engine.js');
 const JS = (globalThis as any).MathSprout;
+
+/* Legacy settings: the port's CONFIG values that make it behave like the prototype. */
+const LEGACY = { GOT_IT_MIN_SESSIONS: 1 };
+const saved: Record<string, unknown> = {};
+beforeAll(() => { for (const [k, v] of Object.entries(LEGACY)) { saved[k] = (TS.CONFIG as any)[k]; (TS.CONFIG as any)[k] = v; } });
+afterAll(() => { Object.assign(TS.CONFIG, saved); });
 
 type Api = typeof TS;
 const engines: [string, Api][] = [['prototype', JS], ['port', TS]];
@@ -28,7 +38,8 @@ const answerOf = (E: Api, st: TS.State, iid: string) => {
 
 /** Runs a scenario on both engines and returns [prototype, port] transcripts. */
 function both(scenario: (E: Api) => unknown) {
-  return engines.map(([, E]) => JSON.parse(JSON.stringify(scenario(E))));
+  // legacy keys exist only in the port's CONFIG (e.g. inside inspect()); leave them out
+  return engines.map(([, E]) => JSON.parse(JSON.stringify(scenario(E)), (k, v) => k in LEGACY ? undefined : v));
 }
 
 describe('content parity', () => {

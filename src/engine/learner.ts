@@ -36,7 +36,9 @@ export function bandOf(win: Attempt[]): Band {
   const lastRun = win.slice(-CONFIG.GOT_IT_RUN).every(a => a.correct);
   // Got it needs a correct step-2+ answer from Recommended or Challenge (§5 invariant 9)
   const stretch = win.some(a => a.correct && a.step >= 2 && a.lane !== 'review');
-  if (n >= CONFIG.BAND_WINDOW && acc >= CONFIG.GOT_IT && lastRun && stretch) return 'Got it';
+  // …and correct answers from more than one session, so one hot streak isn't mastery
+  const sessions = new Set(win.filter(a => a.correct).map(a => a.sessionId)).size;
+  if (n >= CONFIG.BAND_WINDOW && acc >= CONFIG.GOT_IT && lastRun && stretch && sessions >= CONFIG.GOT_IT_MIN_SESSIONS) return 'Got it';
   return acc >= CONFIG.GETTING_IT ? 'Getting it' : 'Still learning';
 }
 
