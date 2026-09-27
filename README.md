@@ -1,12 +1,38 @@
-# Math Sprout — playable prototype (rules-v1)
+# Math Sprout
 
-Built from *Math Sprout Consolidated Specs (2026-09-25)*.
+Built from *Math Sprout Consolidated Specs (2026-09-25)*. `HANDOFF.md` is the build brief; `CLAUDE.md` holds the project rules.
 
-| File | What it is |
+## Layout
+
+| Path | What it is |
 |---|---|
-| `engine.js` | The "server": concept graph (11 skills), 44 templates × 3 steps, pools, issuance, answer parser, learner state, QualifyingEvent bus, XP ledger, flame, BuildGoal. All tunable numbers live in `CONFIG` at the top. |
-| `app.js` | Child UI (home, lane choice, practice, feedback frames, level-up, end card, badges) + the "Behind the glass" inspector. Talks to the engine only through `createServer()`. |
-| `style.css` | IA §13 color map; Lexend + Atkinson Hyperlegible. |
-| `gates.js` | Deploy gates: pool floors (10/template/step, 20/skill/step), spec parser rulings, 7-day sims at 1 and 2 sessions/day in every lane — zero repeats, zero back-to-back templates. `node gates.js` |
-| `bustest.js` | Bus/economy checks: no answers in payloads, unreadable ≠ attempt, replay idempotency, fast-guess mints nothing, flame Hot→Warm→Ember→Resting, Review can't light flame or mint mastery, credit-only ledger, wrong-form frame. `node bustest.js` |
-| `build.py` | Inlines the three sources into `index.html`. `python3 build.py` |
+| `src/engine/` | The engine, rules-v1, in TypeScript with no I/O. Ported from `prototype/engine.js` with no behavior change. |
+| `tests/` | Vitest suite. `gates.test.ts` and `bus.test.ts` are the deploy gates, ported from the prototype. `parity.test.ts` runs the prototype and the port side by side and requires identical state and payloads. |
+| `prototype/` | The original playable prototype. It is the reference behavior for the port. |
+
+### Engine modules (`src/engine/`)
+
+| Module | Role |
+|---|---|
+| `config.ts` | Every tunable number (`CONFIG`). All are uncalibrated stubs. |
+| `content/` | Concept graph (`skills.ts`) and the 44 templates, one file per skill. |
+| `pools.ts` | Deterministic item pools per template version and step; bug values per item. |
+| `parse.ts` | The single answer grammar and form rules. |
+| `learner.ts` | Learner state as a pure replay of attempts: bands, steps, unlocking, focus choice. |
+| `issue.ts` | Issuance: 7-day no-repeat, template rotation, exhaustion fallbacks. |
+| `bus.ts` | QualifyingEvent bus and credit-only ledger; flame and BuildGoal pieces derived from events. |
+| `feedback.ts` | Verdict-first feedback frames from template metadata. |
+| `views.ts` | Client-facing payloads (home, badges, items) and the dev inspector. |
+| `server.ts` | `createServer(state, clock)`: the only entry point that drives the engine. |
+| `sim.ts` | Simulated learner for gates and the dev sample week. |
+
+## Commands
+
+```bash
+npm install
+npm run check          # type-check + full test suite (the deploy gate)
+npm test               # tests only
+npm run prototype:test # the original node gates.js / bustest.js
+```
+
+The prototype still runs as-is: open `prototype/index.html`, or rebuild it with `cd prototype && python3 build.py`.
