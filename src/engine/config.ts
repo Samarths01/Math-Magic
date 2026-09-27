@@ -10,6 +10,7 @@ export const CONFIG = {
   RT_CAP_MS: 120000,            // response-time clamp (ML note, 4:44pm)
   NO_REPEAT_DAYS: 7,
   BAND_WINDOW: 8, BAND_MIN: 6, GETTING_IT: 0.6, GOT_IT: 0.85, GOT_IT_RUN: 3,
+  GOT_IT_MIN_SESSIONS: 2,       // Got it needs correct answers in the window from this many sessions (Samarth, 2026-09-26)
   STEP_UP_RUN: 3, STEP_DOWN_MISSES: 3, STEP_DOWN_WINDOW: 4,
   REVIEW_PER_WEEK: 2, REVIEW_XP_MULT: 0.4,
   XP: { correct: 10, challenge: 15, effort: 3, tick: 15, band: 30, levelUp: 25 },
