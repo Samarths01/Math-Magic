@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototype",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "prototype/serve.cjs",
+        "8123"
+      ],
+      "port": 8123
+    }
+  ]
+}
