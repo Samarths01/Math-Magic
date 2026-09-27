@@ -45,42 +45,8 @@ const I = {
 };
 const HEAT = { hot: '#E4572E', warm: '#F29E4C', ember: '#B5651D', resting: '#9AA0A6', none: '#9AA0A6' };
 
-/* the companion: a sprout who suits up piece by piece. Pieces are violet by default; the Armory can
-   restyle them. Nothing here is green, because green means Correct. */
-const MAT = { sprout: ['#7C5CBF', '#5E3FA3'], bronze: ['#C58A4B', '#8C5A2B'], silver: ['#C3CBD8', '#6B7890'], gold: ['#E8B923', '#9A7400'], night: ['#2B3A67', '#141C33'], royal: ['#5E3FA3', '#3E2775'] };
-const SLOT_OF = ['boots', 'shield', 'cape', 'helmet', 'sword'];           // piece index → armory slot
-const starPts = (cx, cy, r) => Array.from({ length: 10 }, (_, k) => { const a = Math.PI / 5 * k - Math.PI / 2, rr = k % 2 ? r * .45 : r; return `${(cx + rr * Math.cos(a)).toFixed(1)},${(cy + rr * Math.sin(a)).toFixed(1)}`; }).join(' ');
-const DECO = {
-  plume: '<path d="M40 66 C27 58 24 42 31 34 C34 47 38 56 46 62 Z" fill="#9B7FD9" stroke="#5E3FA3" stroke-width="2" stroke-linejoin="round"/>',
-  crown: '<path d="M38 64 L42 50 L52 58 L66 45 L80 58 L90 50 L94 64 Z" fill="#E8B923" stroke="#9A7400" stroke-width="2.2" stroke-linejoin="round"/><circle cx="66" cy="54" r="2.6" fill="#9B7FD9"/>',
-  star: `<polygon points="${starPts(23.5, 100, 7.5)}" fill="#fff" stroke="#6B7890" stroke-width="1.4" stroke-linejoin="round"/>`,
-  sun: '<g stroke="#9A7400" stroke-width="1.8" stroke-linecap="round"><path d="M23.5 90v3M23.5 107v3M14 100h3M30 100h3M17 93.5l2 2M28 104.5l2 2M30 93.5l-2 2M19 104.5l-2 2"/></g><circle cx="23.5" cy="100" r="4.2" fill="#fff" stroke="#9A7400" stroke-width="1.6"/>',
-  stars: `<polygon points="${starPts(28, 118, 4)}" fill="#E8B923"/><polygon points="${starPts(104, 118, 4)}" fill="#E8B923"/><polygon points="${starPts(99, 131, 3)}" fill="#E8B923"/>`,
-  trim: '<path d="M24 127 L22 132 Q66 144 110 132 L108 127" fill="none" stroke="#E8B923" stroke-width="4" stroke-linecap="round"/>',
-  gem: '<circle cx="108.5" cy="108.5" r="3.6" fill="#9B7FD9" stroke="#fff" stroke-width="1.4"/>',
-  wings: '<path d="M42 128 C33 121 29 128 36 134 Z M90 128 C99 121 103 128 96 134 Z" fill="#fff" stroke="#6B7890" stroke-width="1.8" stroke-linejoin="round"/>',
-};
-function sprout(have, cls, fresh, look) {
-  look = look || Armory.look(state);
-  const on = i => i < have;
-  const item = i => look[SLOT_OF[i]];
-  const mat = i => MAT[(item(i) && item(i).mat) || 'sprout'];
-  const P = (i, d, extra) => `<path ${i === fresh ? 'class="fresh"' : ''} d="${d}" fill="${on(i) ? mat(i)[0] : 'none'}" stroke="${on(i) ? mat(i)[1] : '#C7CFDB'}" stroke-width="2.4" ${on(i) ? '' : 'stroke-dasharray="4 4"'} stroke-linejoin="round" ${extra || ''}/>`;
-  const D = i => on(i) && item(i) && item(i).deco ? `<g ${i === fresh ? 'class="fresh"' : ''}>${DECO[item(i).deco]}</g>` : '';
-  return `<svg class="${cls || 'sprout'}" viewBox="0 0 132 150" role="img" aria-label="Sprout warrior with ${have} of 5 pieces">
-    ${P(2, 'M42 72 L22 132 Q66 144 110 132 L90 72 Z')}${D(2)}
-    <path d="M66 54 V34" stroke="#1F2A44" stroke-width="3" stroke-linecap="round"/>
-    <path d="M66 41 C52 27 38 33 41 42 C48 47 59 45 66 41 Z" fill="#F2F4F8" stroke="#1F2A44" stroke-width="2.6" stroke-linejoin="round"/>
-    <path d="M66 37 C79 20 95 25 93 33 C88 41 75 41 66 37 Z" fill="#F2F4F8" stroke="#1F2A44" stroke-width="2.6" stroke-linejoin="round"/>
-    <ellipse cx="66" cy="93" rx="34" ry="38" fill="#FFFFFF" stroke="#1F2A44" stroke-width="3"/>
-    ${P(3, 'M33 82 C33 50 99 50 99 82 Z')}${D(3)}
-    <circle cx="54" cy="94" r="3.8" fill="#1F2A44"/><circle cx="78" cy="94" r="3.8" fill="#1F2A44"/>
-    <path d="M57 105 Q66 112 75 105" fill="none" stroke="#1F2A44" stroke-width="2.8" stroke-linecap="round"/>
-    ${P(1, 'M13 86 L34 80 V104 Q34 118 23.5 123 Q13 118 13 104 Z')}${D(1)}
-    ${P(4, 'M106 58 H111 V106 H117 V111 H111 V122 H106 V111 H100 V106 H106 Z')}${D(4)}
-    ${P(0, 'M42 124 h22 v8 a5 5 0 0 1 -5 5 h-17 z')}${P(0, 'M68 124 h22 v13 h-17 a5 5 0 0 1 -5 -5 z')}${D(0)}
-  </svg>`;
-}
+/* the companion (see warrior.js); it wears whatever the child has chosen in the Armory */
+const sprout = (have, cls, fresh, look) => Warrior.sprout(have, cls, fresh, look || Armory.look(state));
 const PIECE_NAMES = ['Boots', 'Shield', 'Cape', 'Helmet', 'Sword'];
 
 /* ---------- small renderers ---------- */
@@ -263,7 +229,7 @@ function feedbackLivelyHTML(r) {
   const pop = c && m.xp > 0 ? `<span class="xp-pop ${challenge ? 'big' : ''}">${I.star}+${m.xp} XP${challenge ? ' · Challenge' : ''}</span>` : '';
   const f = r.fuel; const pcIdx = Math.max(0, f.pieces.have - 1);
   const moments = [
-    m.qpd ? `<div class="moment flame-m">${I.flame('#E4572E')}<span>Today's flame is lit${f.flame.count > 1 ? ` · ${f.flame.count}-day flame` : ''}</span></div>` : '',
+    m.qpd ? `<div class="moment flame-m">${I.flame('#E4572E')}<span>Today's flame is lit${f.flame.count > 1 ? ` · ${f.flame.count}-day flame` : ''} · +${Armory.ARMORY.TOKENS_PER_QPD} forge token</span></div>` : '',
     m.piece ? `<div class="moment piece-m">${I.piece}<span>${f.pieces.have === f.pieces.per ? `Sprout warrior ${f.pieces.goal} is complete · +${Armory.ARMORY.TOKENS_PER_PIECE + Armory.ARMORY.TOKENS_PER_WARRIOR} forge tokens` : `New piece: ${PIECE_NAMES[pcIdx]} · +${Armory.ARMORY.TOKENS_PER_PIECE} forge token`}</span></div>` : '',
     m.badge ? `<div class="moment badge-m">${I.medal(true)}<span>New badge: ${esc(r.skillName)}</span></div>` : '',
   ].join('');
@@ -373,7 +339,7 @@ function screenArmory() {
       <div class="arm-hero ${power ? 'power' : ''}">${power ? '<i class="spark s1"></i><i class="spark s2"></i><i class="spark s3"></i><i class="spark s4"></i><i class="spark s5"></i>' : ''}${sprout(5, 'arm-svg', -1, preview)}</div>
       <div><h2>Armory</h2>
         <div class="tokens">${I.token}<b>${t.available}</b> forge token${t.available === 1 ? '' : 's'}</div>
-        <p class="note">New piece: +${Armory.ARMORY.TOKENS_PER_PIECE}. Finished warrior: +${Armory.ARMORY.TOKENS_PER_WARRIOR}. Save up for rarer gear.</p>
+        <p class="note">Flame day: +${Armory.ARMORY.TOKENS_PER_QPD}. New piece: +${Armory.ARMORY.TOKENS_PER_PIECE}. Finished warrior: +${Armory.ARMORY.TOKENS_PER_WARRIOR}. Save up for rarer gear.</p>
         ${tryItem && !Armory.view(state).items.find(i => i.id === tryItem.id).owned ? `<p class="tryon">Trying on: <b>${esc(tryItem.name)}</b></p>` : ''}
       </div>
     </div>

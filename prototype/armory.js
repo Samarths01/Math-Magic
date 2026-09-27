@@ -1,13 +1,13 @@
 /* Armory (prototype of spec proposal 2026-09-27). Plays the "server" role, like engine.js.
    Forge tokens are never stored: they are derived from the event log (earned from BuildPieceUnlock
-   events and finished warriors) minus what has been claimed. XP is never spent and never drops.
+   events, finished warriors and qualifying practice days) minus what has been claimed. XP is never spent and never drops.
    Items are fixed and visible up front: rarity means cost, never chance. Claims are permanent. */
 (function (G) {
 'use strict';
 const M = G.MathSprout;
 
 /* Uncalibrated stubs, like everything in CONFIG. */
-const ARMORY = { TOKENS_PER_PIECE: 1, TOKENS_PER_WARRIOR: 2, COST: { common: 1, rare: 3, legendary: 5 }, LEGENDARY_NEEDS_WARRIORS: 1 };
+const ARMORY = { TOKENS_PER_PIECE: 1, TOKENS_PER_WARRIOR: 2, TOKENS_PER_QPD: 1, COST: { common: 2, rare: 6, legendary: 15 }, LEGENDARY_NEEDS_WARRIORS: 1 };
 
 const SLOTS = ['helmet', 'shield', 'cape', 'sword', 'boots'];
 const SLOT_NAMES = { helmet: 'Helmet', shield: 'Shield', cape: 'Cape', sword: 'Sword', boots: 'Boots' };
@@ -29,6 +29,7 @@ const ITEMS = [
   it('winged-boots', 'boots', 'Winged boots', 'rare', 'silver', 'wings'),
 ];
 const ITEM = Object.fromEntries(ITEMS.map(x => [x.id, x]));
+const RARITY_RANK = { common: 0, rare: 1, legendary: 2 };
 
 function ensure(S) {
   if (!S.armory) S.armory = { claims: [], wearing: {} };
@@ -41,9 +42,11 @@ function tokens(S) {
   ensure(S);
   const pieces = S.events.filter(e => e.type === 'BuildPieceUnlock').length;
   const warriors = Math.floor(pieces / M.CONFIG.PIECES_PER_GOAL) + S.dev.armory.bonusWarriors;
-  const earned = pieces * ARMORY.TOKENS_PER_PIECE + warriors * ARMORY.TOKENS_PER_WARRIOR + S.dev.armory.bonusTokens;
+  // qualifying days keep tokens coming after a child's first-time mastery events run out
+  const days = new Set(S.events.filter(e => e.type === 'QualifyingPracticeDay').map(e => e.day)).size;
+  const earned = pieces * ARMORY.TOKENS_PER_PIECE + warriors * ARMORY.TOKENS_PER_WARRIOR + days * ARMORY.TOKENS_PER_QPD + S.dev.armory.bonusTokens;
   const spent = S.armory.claims.reduce((n, c) => n + ITEM[c.item].cost, 0);
-  return { earned, spent, available: earned - spent, warriors };
+  return { earned, spent, available: earned - spent, warriors, days };
 }
 
 const owns = (S, id) => ensure(S).claims.some(c => c.item === id);
@@ -66,7 +69,10 @@ function claim(S, id, now) {
   if (owns(S, id)) return { error: 'already-owned' };
   if (x.rarity === 'legendary' && t.warriors < ARMORY.LEGENDARY_NEEDS_WARRIORS) return { error: 'needs-warrior' };
   if (t.available < x.cost) return { error: 'not-enough-tokens' };
-  A.claims.push({ item: id, at: now }); A.wearing[x.slot] = id;          // append-only claim; wear it straight away
+  A.claims.push({ item: id, at: now });                                   // append-only claim
+  // put it on, unless that would swap out something rarer the child is already wearing
+  const cur = A.wearing[x.slot] && ITEM[A.wearing[x.slot]];
+  if (!cur || RARITY_RANK[x.rarity] >= RARITY_RANK[cur.rarity]) A.wearing[x.slot] = id;
   return { ok: true, item: x, tokens: tokens(S).available };
 }
 

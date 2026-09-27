@@ -26,6 +26,14 @@ The power-up glow was hard to catch. It was small, in a corner and rare. More im
 
 **Spec:** `docs/spec-proposals/2026-09-27-armory.md` needs Samarth's stamp. It includes the "not a shop" exception.
 
+**Follow-up (same day):**
+- **Art.** The warrior was mostly face, so the gear didn't read. It's now redrawn as a full-body chibi knight (`prototype/warrior.js`): higher tiers change the silhouette, and there's a gold-aura set bonus.
+- **Economy.** A simulation showed that mastery-only tokens stall after about 4 weeks.
+  - Added +1 token per qualifying practice day.
+  - That made the 40-token catalog far too small, so prices went to 2/6/15 (100 in total).
+  - New sets are to come about every 4 weeks once there's final art.
+- **Fix.** Claiming an item no longer swaps out rarer gear the child is already wearing.
+
 ## 2026-09-27 · The run feels muted
 
 **Found by:** Samarth · **Type:** feature + spec
