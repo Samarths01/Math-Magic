@@ -210,3 +210,129 @@ h1,h2,h3{font-family:var(--display); margin:0; text-wrap:balance; letter-spacing
 .sample{font-size:13px; background:#FBF3D8; color:var(--gold-t); border-radius:9px; padding:8px 10px}
 details.cfg summary{cursor:pointer; font-family:var(--display); font-weight:500}
 @media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation:none!important; transition:none!important} }
+
+/* ---------- lively mode (dogfood switch) ----------
+   Colors keep the IA §13 map: gold = XP, hot = flame, violet = pieces, ink = the warrior.
+   Green stays reserved for Correct. */
+.app{position:relative}
+.lively .progress.path{padding-top:18px}
+.lively .progress.path i{position:relative; height:7px; transition:background .3s}
+.lively .progress.path i.done{background:var(--gold)}
+.lively .progress.path i.done.soft{background:var(--line-2)}
+.lively .progress.path i.now{background:var(--gold); opacity:.35}
+.lively .progress.path i.flag b{position:absolute; left:50%; bottom:9px; width:18px; height:18px; transform:translateX(-50%)}
+.lively .progress.path i.flag b svg{width:18px; height:18px; display:block}
+.lively .progress.path i.flag b.on{animation:flameburst 1.1s ease 1}
+.path-note{order:4; flex:1 0 100%; margin:-2px 0 0; font-family:var(--display); font-size:12.5px; font-weight:500; color:var(--slate)}
+.path-note.lit{color:var(--hot-t)}
+
+.buddy{position:absolute; right:18px; bottom:4px; width:58px; height:66px; pointer-events:none}
+.buddy .buddy-svg{width:100%; height:100%; display:block; transform-origin:80% 95%; animation:idle 3.2s ease-in-out infinite}
+.buddy.cheer .buddy-svg{animation:hop .7s cubic-bezier(.3,1.5,.5,1) 1, idle 3.2s ease-in-out .7s infinite}
+.buddy.nod .buddy-svg{animation:nod .8s ease 1, idle 3.2s ease-in-out .8s infinite}
+.buddy.power{z-index:2}
+.buddy.power .buddy-svg{animation:power 2.2s cubic-bezier(.3,1.3,.5,1) 1, idle 3.2s ease-in-out 2.2s infinite}
+.buddy.power::before{content:""; position:absolute; inset:-26px -12px -26px -40px; border-radius:50%; background:radial-gradient(circle, rgba(124,92,191,.55), rgba(124,92,191,.18) 45%, transparent 70%); animation:glow 2.2s ease 1 both}
+.buddy .fresh{transform-box:fill-box; transform-origin:center; animation:freshpiece 2.2s ease 1}
+@keyframes freshpiece{0%,20%{opacity:0; transform:scale(.3)}45%{opacity:1; transform:scale(1.35)}60%{transform:scale(.95)}75%{transform:scale(1.08)}100%{transform:scale(1)}}
+.spark{position:absolute; left:50%; top:45%; width:10px; height:10px; margin:-5px 0 0 -5px; background:var(--violet); clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); opacity:0; animation:spark 1.3s ease-out .35s 1 both}
+.spark.s1{--dx:-44px; --dy:-40px} .spark.s2{--dx:46px; --dy:-34px} .spark.s3{--dx:-50px; --dy:6px; width:8px; height:8px} .spark.s4{--dx:40px; --dy:18px; width:8px; height:8px} .spark.s5{--dx:0px; --dy:-58px; background:var(--gold)}
+@keyframes spark{0%{opacity:0; transform:translate(0,0) scale(.4)}25%{opacity:1}100%{opacity:0; transform:translate(var(--dx),var(--dy)) scale(1.1) rotate(90deg)}}
+.preview-tag{position:absolute; left:50%; bottom:-14px; transform:translateX(-50%); font-family:var(--display); font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--violet-t); background:var(--violet-bg); border-radius:999px; padding:1px 7px; white-space:nowrap}
+.gnote{font-size:12.5px; color:var(--slate)}
+.gbtn[disabled]{opacity:.5; cursor:not-allowed}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-14px) rotate(-6deg)}70%{transform:translateY(0) rotate(3deg)}100%{transform:none}}
+@keyframes nod{0%,100%{transform:none}30%{transform:rotate(6deg)}60%{transform:rotate(-3deg)}}
+@keyframes power{0%{transform:scale(1)}18%{transform:scale(.9) translateY(2px)}40%{transform:scale(1.7) translateY(-16px) rotate(-4deg)}55%{transform:scale(1.55) translateY(-12px) rotate(3deg)}75%{transform:scale(1.6) translateY(-14px)}100%{transform:scale(1)}}
+@keyframes glow{0%{opacity:0; transform:scale(.5)}35%{opacity:1; transform:scale(1.25)}70%{opacity:.8; transform:scale(1.35)}100%{opacity:0; transform:scale(1.6)}}
+.lively .stage{position:relative; padding-bottom:28px}
+
+.lively-fb{gap:12px}
+.vrow{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.lively-fb .well{margin:0; font-size:18px; color:var(--ink)}
+.more summary{cursor:pointer; font-family:var(--display); font-weight:600; font-size:14.5px; color:var(--ink-2); list-style:none; display:inline-flex; align-items:center; gap:6px}
+.more summary::-webkit-details-marker{display:none}
+.more summary::after{content:"›"; font-size:18px; line-height:1; transition:transform .15s}
+.more[open] summary::after{transform:rotate(90deg)}
+.more .beats{margin-top:10px}
+.xp-pop{display:inline-flex; align-items:center; gap:6px; background:#FBF3D8; color:var(--gold-t); border:1.5px solid var(--gold); border-radius:999px; padding:5px 12px; font-family:var(--display); font-weight:700; font-size:16px; font-variant-numeric:tabular-nums; animation:xppop .55s cubic-bezier(.3,1.6,.5,1) both}
+.xp-pop svg{width:18px; height:18px}
+.xp-pop.big{font-size:19px; padding:7px 15px; box-shadow:0 0 0 4px rgba(232,185,35,.25)}
+.xp-pop.big svg{width:22px; height:22px}
+.xp-pop.ghost{position:absolute; z-index:5; margin:0; pointer-events:none; animation:none}
+@keyframes xppop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.12); opacity:1}100%{transform:scale(1)}}
+.moment{display:flex; align-items:center; gap:10px; border-radius:12px; padding:10px 12px; font-family:var(--display); font-weight:600; font-size:16px; animation:rise .35s ease .25s both}
+.moment svg{width:22px; height:22px; flex:none}
+.flame-m{background:#FDE7DF; color:var(--hot-t)}
+.piece-m{background:var(--violet-bg); color:var(--violet-t)}
+.badge-m{background:var(--slate-bg); color:var(--ink)}
+.fuel .f.bump{animation:bump .6s ease 1}
+.fuel .f[class*="flame-"].bump svg{animation:flameburst 1.1s ease 1}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes flameburst{0%{transform:scale(1); filter:none}35%{transform:scale(1.7); filter:drop-shadow(0 0 6px rgba(228,87,46,.8))}100%{transform:scale(1); filter:none}}
+.lively-lu .sprout{animation:power 2.2s cubic-bezier(.3,1.3,.5,1) .2s 1 both}
+
+/* power-up at centre stage: the stem dims, the warrior grows in the middle, then hands back to the corner */
+.power-stage{position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,.88); pointer-events:none; animation:stagefade 2.6s ease 1 both}
+.power-hero{position:relative; width:150px; height:170px}
+.power-hero::before{content:""; position:absolute; inset:-40px; border-radius:50%; background:radial-gradient(circle, rgba(124,92,191,.5), rgba(124,92,191,.15) 45%, transparent 70%); animation:glow 2.2s ease .1s 1 both}
+.hero-svg{position:relative; width:100%; height:100%; display:block; transform-origin:50% 90%; animation:heroup 2.4s cubic-bezier(.3,1.3,.5,1) 1 both}
+.hero-svg .fresh{transform-box:fill-box; transform-origin:center; animation:freshpiece 2.2s ease .15s 1 both}
+.power-hero .spark{width:14px; height:14px; margin:-7px 0 0 -7px}
+.power-hero .spark.s1{--dx:-90px; --dy:-70px} .power-hero .spark.s2{--dx:92px; --dy:-60px} .power-hero .spark.s3{--dx:-100px; --dy:20px} .power-hero .spark.s4{--dx:96px; --dy:30px} .power-hero .spark.s5{--dx:0px; --dy:-110px}
+.power-stage .preview-tag{position:static; transform:none; margin-top:10px}
+.buddy.returning{opacity:0; animation:buddyback .4s ease 2.4s 1 both}
+@keyframes heroup{0%{transform:scale(.35) translate(90px,40px); opacity:0}18%{transform:scale(.9); opacity:1}40%{transform:scale(1.12) translateY(-10px) rotate(-3deg)}55%{transform:scale(1.05) rotate(2deg)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes stagefade{0%{opacity:0}12%{opacity:1}82%{opacity:1}100%{opacity:0}}
+@keyframes buddyback{from{opacity:0; transform:scale(.6)}to{opacity:1; transform:none}}
+
+/* ---------- armory (prototype of the 2026-09-27 proposal) ---------- */
+.armory-entry{appearance:none; display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:10px; width:100%; border:1.5px solid var(--line-2); background:var(--surface); border-radius:var(--r); padding:13px 16px; cursor:pointer; text-align:left}
+.armory-entry:hover{border-color:var(--ink)}
+.armory-entry .ae-t{font-family:var(--display); font-weight:600; font-size:18px}
+.armory-entry .ae-n{display:inline-flex; align-items:center; gap:6px; font-family:var(--display); font-weight:600; font-size:14.5px; color:var(--violet-t)}
+.armory-entry .ae-n svg{width:18px; height:18px}
+.armory-entry .ae-go{font-size:22px; color:var(--slate)}
+.armory{gap:14px}
+.arm-top{display:grid; grid-template-columns:128px 1fr; gap:16px; align-items:center}
+.arm-top h2{font-size:26px}
+.arm-hero{position:relative; width:128px; height:146px; background:var(--violet-bg); border-radius:18px; display:grid; place-items:center}
+.arm-svg{width:112px; height:128px; transform-origin:50% 90%}
+.arm-hero.power .arm-svg{animation:heroup 2s cubic-bezier(.3,1.3,.5,1) 1 both}
+.arm-hero.power::before{content:""; position:absolute; inset:-18px; border-radius:50%; background:radial-gradient(circle, rgba(124,92,191,.5), transparent 70%); animation:glow 2s ease 1 both}
+.arm-hero .spark{z-index:2}
+.tokens{display:inline-flex; align-items:center; gap:7px; margin-top:6px; font-family:var(--display); font-weight:600; font-size:16px; color:var(--violet-t); background:var(--violet-bg); border-radius:999px; padding:5px 12px 5px 8px; font-variant-numeric:tabular-nums}
+.tokens svg{width:20px; height:20px} .tokens b{font-size:18px}
+.armory .note{font-size:13.5px; margin-top:8px}
+.tryon{margin:6px 0 0; font-size:14px; color:var(--ink-2)}
+.slots{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px}
+.slots button{appearance:none; flex:none; border:1.5px solid var(--line-2); background:var(--surface); border-radius:999px; padding:7px 13px; font-family:var(--display); font-weight:600; font-size:14px; cursor:pointer; color:var(--ink-2)}
+.slots button[aria-selected="true"]{background:var(--ink); border-color:var(--ink); color:#fff}
+.aitems{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.aitem{display:grid; grid-template-columns:76px 1fr; gap:12px; align-items:center; border:1.5px solid var(--line); border-radius:var(--r); padding:8px 12px 8px 8px; background:var(--surface)}
+.aitem.is-wearing{border-color:var(--ink)}
+.aitem.is-trying{border-color:var(--violet); box-shadow:0 0 0 3px var(--violet-bg)}
+.aitem.r-legendary{background:linear-gradient(135deg, #FFFBEA, var(--surface) 55%)}
+.alook{appearance:none; border:0; padding:0; background:var(--ground); border-radius:12px; width:76px; height:84px; display:grid; place-items:center; cursor:pointer}
+.alook .mini{width:64px; height:74px}
+.ainfo{display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-width:0}
+.aname{font-family:var(--display); font-weight:600; font-size:16.5px}
+.rar{font-family:var(--display); font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; border-radius:999px; padding:2px 8px}
+.rar.r-starter,.rar.r-common{background:var(--slate-bg); color:var(--slate-ink)}
+.rar.r-rare{background:var(--ink); color:#fff}
+.rar.r-legendary{background:#FBF3D8; color:var(--gold-t); border:1px solid var(--gold)}
+.aact{margin-top:4px; width:100%}
+.abtn{appearance:none; display:inline-flex; align-items:center; gap:6px; border:1.5px solid var(--ink); background:var(--surface); color:var(--ink); border-radius:10px; padding:7px 12px; font-family:var(--display); font-weight:600; font-size:14.5px; cursor:pointer}
+.abtn svg{width:16px; height:16px}
+.abtn.go{background:var(--ink); color:#fff}
+.abtn.ghost{border-color:var(--line-2)}
+.wearing{display:inline-flex; align-items:center; gap:6px; font-family:var(--display); font-weight:600; font-size:14.5px; color:var(--ink)}
+.wearing svg{width:16px; height:16px}
+.locked{font-size:14px; color:var(--slate)}
+.confirm{display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-family:var(--display); font-weight:500; font-size:14.5px}
+.save{display:flex; flex-direction:column; gap:4px; font-size:13.5px; color:var(--slate)}
+.savebar{height:7px; border-radius:4px; background:var(--slate-bg); overflow:hidden; max-width:180px}
+.savebar i{display:block; height:100%; background:var(--violet); border-radius:4px}
+.glabel{font-family:var(--display); font-weight:600; font-size:13px; color:var(--slate); min-width:4.5em}
+@media (max-width:420px){ .arm-top{grid-template-columns:1fr; justify-items:center; text-align:center} }
