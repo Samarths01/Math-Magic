@@ -5,7 +5,7 @@ export { SKILLS, SKILL, TEMPLATES, TPL, TPL_BY_SKILL } from './content';
 export type * from './content/types';
 export { pool, bugsFor, itemKey } from './pools';
 export { parseAnswer, formOk, typedText } from './parse';
-export { replaySkill, bandOf, RANK } from './learner';
+export { replaySkill, bandOf, stuckSkills, RANK } from './learner';
 export { createServer, type Server } from './server';
 export { freshState } from './state';
 export type * from './state';

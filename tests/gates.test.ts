@@ -1,6 +1,6 @@
 /* Deploy gates, ported from prototype/gates.js. */
 import { describe, expect, it } from 'vitest';
-import { CONFIG, DAY, SKILLS, TEMPLATES, TPL, TPL_BY_SKILL, bugsFor, createServer, eqR, formOk, freshState, parseAnswer, pool, simulateSession, type AnswerForm, type AnswerKind, type Lane, type Step } from '../src/engine';
+import { CONFIG, DAY, SKILLS, TEMPLATES, TPL, TPL_BY_SKILL, bugsFor, createServer, eqR, formOk, freshState, parseAnswer, pool, simulateSession, dayKey, stuckSkills, type AnswerForm, type AnswerKind, type Lane, type Step } from '../src/engine';
 
 const STEPS: Step[] = [1, 2, 3];
 const BAD_COPY = /undefined|NaN/;
@@ -89,5 +89,69 @@ describe('7-day simulations', () => {
     expect(r.items).toBe(84 * perDay);
     expect(r.repeats).toBe(0);
     expect(r.bb2b).toBe(0);
+  });
+});
+
+/* Stuck learner (docs/spec-proposals/2026-09-27-stuck-learner.md): the gate asserts the
+   routing, not bigger pools. No focusOverride here: the chooser must do the work. */
+describe('stuck learner routing', () => {
+  const t0 = Date.UTC(2026, 8, 20, 17);
+  const failing = { pBase: 0.05, pStep: 0 };
+
+  it('7 days at 4 sessions a day: capped focus, no exhausted repeats', () => {
+    let t = t0; const st = freshState('Stuck', 3); const srv = createServer(st, () => t);
+    for (let d = 0; d < 7; d++) { for (let k = 0; k < 4; k++) { simulateSession(srv, failing); t += 2 * 3600e3; } t = t0 + (d + 1) * DAY; }
+    const perDay: Record<string, number> = {};
+    for (const s of st.sessions) { const key = dayKey(s.startedAt) + s.focus; perDay[key] = (perDay[key] || 0) + 1; }
+    expect(Math.max(...Object.values(perDay))).toBeLessThanOrEqual(CONFIG.FOCUS_MAX_PER_DAY);
+    expect(st.issued.filter(i => i.issueReason === 'exhausted_repeat')).toEqual([]);
+    // and no skill-step is served more items than its pools hold
+    const served: Record<string, number> = {};
+    for (const i of st.issued) served[i.skill + i.step] = (served[i.skill + i.step] || 0) + 1;
+    for (const [k, n] of Object.entries(served)) {
+      const size = TEMPLATES.filter(t => t.skill + '' === k.slice(0, -1)).reduce((sum, t) => sum + pool(t.id, Number(k.slice(-1)) as Step).length, 0);
+      expect(n, k).toBeLessThanOrEqual(size);
+    }
+  });
+
+  /** Fails `skill` for STUCK_SESSIONS sessions on day 1, then moves the clock to day 2. */
+  function stuckOnDayOne(skill: 'eq' | 'uf') {
+    let t = t0; const st = freshState('Stuck', 3); const srv = createServer(st, () => t);
+    st.dev.focusOverride = skill;
+    for (let k = 0; k < CONFIG.STUCK_SESSIONS; k++) { simulateSession(srv, failing); t += 3600e3; }
+    st.dev.focusOverride = null; t = t0 + DAY;
+    return { st, srv };
+  }
+  const lastFocus = (st: ReturnType<typeof freshState>) => st.sessions[st.sessions.length - 1].focus;
+
+  it('stuck at step 1 with an unmastered prerequisite: the prerequisite is next', () => {
+    const { st, srv } = stuckOnDayOne('eq');
+    expect(stuckSkills(st, dayKey(t0 + DAY))).toContain('eq');
+    srv.startSession();
+    expect(lastFocus(st)).toBe('uf');
+  });
+
+  it('stuck with no prerequisite to visit: the skill rests, then returns', () => {
+    const { st, srv } = stuckOnDayOne('uf');
+    expect(stuckSkills(st, dayKey(t0 + DAY))).toContain('uf');
+    srv.startSession();
+    expect(lastFocus(st)).not.toBe('uf');
+    expect(stuckSkills(st, dayKey(t0 + CONFIG.REST_DAYS * DAY))).not.toContain('uf');
+  });
+
+  it('the daily cap sends the third session of a day elsewhere', () => {
+    let t = t0; const st = freshState('Cap', 3); const srv = createServer(st, () => t);
+    st.dev.focusOverride = 'eq';
+    for (let k = 0; k < CONFIG.FOCUS_MAX_PER_DAY; k++) { simulateSession(srv, { pBase: 0.7, pStep: 0 }); t += 3600e3; }
+    st.dev.focusOverride = null;
+    srv.startSession();
+    expect(lastFocus(st)).not.toBe('eq');
+  });
+
+  it('a session with good answers is never stuck', () => {
+    let t = t0; const st = freshState('Fine', 3); const srv = createServer(st, () => t);
+    st.dev.focusOverride = 'eq';
+    for (let k = 0; k < 3; k++) { simulateSession(srv, { pBase: 0.9, pStep: 0 }); t += 3600e3; }
+    expect(stuckSkills(st, dayKey(t))).toEqual([]);
   });
 });
