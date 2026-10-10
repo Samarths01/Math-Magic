@@ -1,6 +1,6 @@
 /* Deploy gates, ported from prototype/gates.js. */
 import { describe, expect, it } from 'vitest';
-import { CONFIG, DAY, SKILLS, TEMPLATES, TPL, TPL_BY_SKILL, bugsFor, createServer, eqR, formOk, freshState, parseAnswer, pool, simulateSession, dayKey, stuckSkills, type AnswerForm, type AnswerKind, type Lane, type Step } from '../src/engine';
+import { CONFIG, DAY, SKILLS, TEMPLATES, TPL, TPL_BY_SKILL, bugsFor, createServer, eqR, formOk, freshState, parseAnswer, pool, simulateSession, dayKey, stuckSkills, replaySkill, type AnswerForm, type AnswerKind, type Lane, type Step } from '../src/engine';
 
 const STEPS: Step[] = [1, 2, 3];
 const BAD_COPY = /undefined|NaN/;
@@ -153,5 +153,40 @@ describe('stuck learner routing', () => {
     st.dev.focusOverride = 'eq';
     for (let k = 0; k < 3; k++) { simulateSession(srv, { pBase: 0.9, pStep: 0 }); t += 3600e3; }
     expect(stuckSkills(st, dayKey(t))).toEqual([]);
+  });
+});
+
+/* Focus rotation (persona review, 2026-09-29): a band rise only keeps a skill in focus if it
+   happened within the last FOCUS_MAX_SESSIONS focus sessions. A rise long ago must not make
+   the skill the focus until Got it. */
+describe('focus rotation', () => {
+  const t0 = Date.UTC(2026, 8, 20, 17);
+  const plateau = { pBase: 0.7, pStep: 0 };   // reaches Getting it, stays below Got it
+
+  /** `n` focus sessions on `skill`, one a day (so the daily cap never applies). */
+  function onSkill(skill: 'pv', n: number) {
+    let t = t0; const st = freshState('Plateau', 3); const srv = createServer(st, () => t);
+    st.dev.focusOverride = skill;
+    for (let k = 0; k < n; k++) { simulateSession(srv, plateau); t += DAY; }
+    st.dev.focusOverride = null;
+    return { st, srv };
+  }
+  const lastFocus = (st: ReturnType<typeof freshState>) => st.sessions[st.sessions.length - 1].focus;
+
+  it('rotates after FOCUS_MAX_SESSIONS sessions with no band rise, even if the band rose earlier', () => {
+    const { st, srv } = onSkill('pv', 1 + CONFIG.FOCUS_MAX_SESSIONS);
+    // preconditions: the band rose in the first session, then held for the last FOCUS_MAX_SESSIONS
+    expect(st.sessions[0].bandAtStart).toBe('Still learning');
+    expect(st.sessions.slice(1).map(s => s.bandAtStart)).toEqual(Array(CONFIG.FOCUS_MAX_SESSIONS).fill('Getting it'));
+    expect(replaySkill(st, 'pv').band).toBe('Getting it');
+    srv.startSession();
+    expect(lastFocus(st)).not.toBe('pv');
+  });
+
+  it('keeps the focus while the streak is shorter than FOCUS_MAX_SESSIONS', () => {
+    const { st, srv } = onSkill('pv', CONFIG.FOCUS_MAX_SESSIONS - 1);
+    expect(replaySkill(st, 'pv').band).not.toBe('Got it');
+    srv.startSession();
+    expect(lastFocus(st)).toBe('pv');
   });
 });

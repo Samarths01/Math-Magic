@@ -108,7 +108,9 @@ function pickFocus(S: State, us: SkillId[], allUnlocked: SkillId[]): SkillId {
     const cur = replaySkill(S, last.focus);
     const streak = [];
     for (let i = S.sessions.length - 1; i >= 0 && S.sessions[i].focus === last.focus; i--) if (S.sessions[i].attempted > 0) streak.push(S.sessions[i]);
-    const moved = streak.length && RANK[cur.band] > RANK[streak[streak.length - 1].bandAtStart];
+    // a rise counts only within the last FOCUS_RISE_WINDOW sessions; one long ago doesn't hold the focus
+    const recent = streak.slice(0, CONFIG.FOCUS_RISE_WINDOW);
+    const moved = recent.length && RANK[cur.band] > RANK[recent[recent.length - 1].bandAtStart];
     if (cur.band !== 'Got it' && (streak.length < CONFIG.FOCUS_MAX_SESSIONS || moved)) return last.focus;
   }
   const recentFocus = S.sessions.slice(-3).map(s => s.focus);
