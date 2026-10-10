@@ -27,6 +27,7 @@ const ITEMS = [
   it('gold-sword', 'sword', 'Golden sword', 'legendary', 'gold', 'gem'),
   it('bronze-boots', 'boots', 'Bronze boots', 'common', 'bronze'),
   it('winged-boots', 'boots', 'Winged boots', 'rare', 'silver', 'wings'),
+  it('golden-boots', 'boots', 'Golden boots', 'legendary', 'gold', 'goldwings'),
 ];
 const ITEM = Object.fromEntries(ITEMS.map(x => [x.id, x]));
 const RARITY_RANK = { common: 0, rare: 1, legendary: 2 };

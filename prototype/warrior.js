@@ -24,6 +24,13 @@ function cape(tier, m, ghost, deco) {
   return s;
 }
 function boots(tier, m, ghost, deco) {
+  // legendary boots are taller, with flared cuffs: the shape changes, not just the colour
+  if (!ghost && tier === 'legendary') {
+    let s = `<path d="M44 112 H56 V140 H42 V136 Q44 132 44 128 Z M64 112 H76 V128 Q76 132 78 136 V140 H64 Z" fill="${m[0]}" stroke="${m[1]}" stroke-width="2" stroke-linejoin="round"/>` +
+      `<rect x="41" y="109" width="18" height="7" rx="3" fill="${m[0]}" stroke="${m[1]}" stroke-width="2"/><rect x="61" y="109" width="18" height="7" rx="3" fill="${m[0]}" stroke="${m[1]}" stroke-width="2"/>`;
+    if (deco === 'goldwings') s += `<path d="M42 122 C28 108 20 122 34 134 C30 126 34 122 42 128 Z M78 122 C92 108 100 122 86 134 C90 126 86 122 78 128 Z" fill="#FFF4C4" stroke="${m[1]}" stroke-width="1.8" stroke-linejoin="round"/>`;
+    return s;
+  }
   let s = `<rect x="43" y="114" width="14" height="26" rx="3.5" ${fillOf(m, ghost)} stroke-width="2"/><rect x="63" y="114" width="14" height="26" rx="3.5" ${fillOf(m, ghost)} stroke-width="2"/>`;
   if (!ghost && deco === 'wings') s += `<path d="M43 124 C33 116 29 126 38 132 Z M77 124 C87 116 91 126 82 132 Z" fill="#fff" stroke="#5E6A80" stroke-width="1.8" stroke-linejoin="round"/>`;
   return s;
@@ -67,7 +74,7 @@ function sprout(have, cls, fresh, look) {
   };
   // set bonus: every legendary slot earned and worn → a golden aura that stays
   const legendary = SLOT_OF.filter((s, i) => i < have && look[s] && look[s].rarity === 'legendary').length;
-  const aura = legendary >= 4 ? `<circle cx="60" cy="82" r="58" fill="#E8B923" opacity=".14"/><circle cx="60" cy="82" r="44" fill="#E8B923" opacity=".12"/><polygon points="${starPts(12, 32, 5)}" fill="#E8B923"/><polygon points="${starPts(108, 44, 4)}" fill="#E8B923"/><polygon points="${starPts(106, 130, 3.5)}" fill="#9B7FD9"/>` : '';
+  const aura = legendary === SLOT_OF.length ? `<circle cx="60" cy="82" r="58" fill="#E8B923" opacity=".14"/><circle cx="60" cy="82" r="44" fill="#E8B923" opacity=".12"/><polygon points="${starPts(12, 32, 5)}" fill="#E8B923"/><polygon points="${starPts(108, 44, 4)}" fill="#E8B923"/><polygon points="${starPts(106, 130, 3.5)}" fill="#9B7FD9"/>` : '';
   const helmOn = have > 3;
   return `<svg class="${cls || 'sprout'}" viewBox="0 0 120 150" role="img" aria-label="Sprout warrior with ${have} of 5 pieces">
     ${aura}${part(2)}${part(0)}

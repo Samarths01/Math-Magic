@@ -3,6 +3,18 @@
 Findings from playing the app, and what each one turned into. Newest first.
 Type: **bug** · **copy** · **tuning** (a `CONFIG` value) · **feature** · **spec** (needs a dated spec section).
 
+## 2026-10-07 · Armory stamped; legendary boots added
+
+**Found by:** Samarth · **Type:** spec + feature
+
+Seeing the knight in starter, rare and legendary gear side by side showed that boots stopped at Rare, so the "full legendary" look still had silver winged boots.
+
+**Done:**
+- *Golden boots* (legendary, 15 tokens): taller, flared cuffs, gold wings.
+- The gold aura now needs a legendary in all five slots.
+- The catalog is 15 items and 115 tokens (was 14 and 100).
+- `docs/spec-proposals/2026-09-27-armory.md` is stamped, including the "not a shop" exception.
+
 ## 2026-09-27 · The warrior should show growth, and the kid should shape it
 
 **Found by:** Samarth · **Type:** feature + spec
