@@ -22,7 +22,7 @@ export function createServer(state: State, clock?: () => number) {
     if (lane === 'review' && reviewUsedThisWeek(ctx) >= CONFIG.REVIEW_PER_WEEK) lane = 'recommended';
     // an abandoned session simply ends; nothing is minted for it
     S.sessions.filter(s => !s.endedAt).forEach(s => { s.endedAt = ctx.now(); s.abandoned = true; });
-    const focus = chooseFocus(S); const mixCount = CONFIG.MIX_SLOTS.filter(x => x <= CONFIG.SESSION_ITEMS).length;
+    const focus = chooseFocus(S, ctx.today()); const mixCount = CONFIG.MIX_SLOTS.filter(x => x <= CONFIG.SESSION_ITEMS).length;
     const mix = mixSkillsFor(S, focus, mixCount); let mi = 0;
     // the plan is frozen at creation (Arch §31a addendum 3)
     const plan: SkillId[] = []; for (let i = 1; i <= CONFIG.SESSION_ITEMS; i++) plan.push(CONFIG.MIX_SLOTS.includes(i) && mix.length ? mix[mi++ % mix.length] : focus);

@@ -42,7 +42,7 @@ export function reviewUsedThisWeek(ctx: Ctx): number {
 
 export function homeView(ctx: Ctx) {
   const { S } = ctx;
-  const focus = chooseFocus(S); const cv = clientView(S, focus);
+  const focus = chooseFocus(S, ctx.today()); const cv = clientView(S, focus);
   const open = S.sessions.find(s => !s.endedAt && s.cursor < s.plan.length && s.cursor > 0);
   return { name: S.child.name, focus: { id: focus, name: SKILL[focus].name, bandLabel: cv.bandLabel }, fuel: fuel(ctx), laneOffer: laneOffer(S, focus),
            reviewLeft: Math.max(0, CONFIG.REVIEW_PER_WEEK - reviewUsedThisWeek(ctx)), resumable: !!open, stepLabel: stepLabel(replaySkill(S, focus).step) };
@@ -68,6 +68,6 @@ export function inspect(ctx: Ctx) {
     events: S.events.slice(-14).reverse(),
     issued: S.issued.slice(-10).reverse().map(i => ({ skill: i.skill, tpl: i.tpl, step: i.step, lane: i.lane, reason: i.issueReason, evidence: i.evidenceEligible })),
     totals: { attempts: S.attempts.length, honest: S.attempts.filter(a => a.honest).length, rejects: S.rejects.length, fastGuess: S.attempts.filter(a => a.fastGuess).length, xp: xpTotal(S), qpd: qpdDays(S).length },
-    focus: chooseFocus(S), config: CONFIG,
+    focus: chooseFocus(S, ctx.today()), config: CONFIG,
   };
 }

@@ -17,6 +17,11 @@ export const CONFIG = {
   TICK_DELTA: 0.34, TICK_MIN: 6,
   PIECES_PER_GOAL: 5, FLAME_MILESTONES: [3, 7, 14],
   FOCUS_MAX_SESSIONS: 4,        // rotate focus if the band hasn't moved up in this many focus sessions
+  STUCK_SESSIONS: 2,            // consecutive weak focus sessions on a skill that make it stuck (stuck-learner proposal)
+  STUCK_ACC: 0.5,               // a focus session is weak below this accuracy on band-evidence attempts
+  STUCK_MIN_ATTEMPTS: 4,        // fewer band-evidence attempts than this and a session says nothing either way
+  REST_DAYS: 2,                 // days a stuck skill stays out of focus (or is routed to a prerequisite)
+  FOCUS_MAX_PER_DAY: 2,         // focus sessions on one skill in one child-day
   POOL_FLOOR_TEMPLATE: 10, POOL_FLOOR_SKILL: 20, POOL_CAP: 80,
 };
 

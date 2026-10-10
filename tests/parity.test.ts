@@ -5,7 +5,9 @@
    reproduces the prototype (below) or retire the affected scenario.
 
    Intentional divergences, reproduced here with legacy settings:
-   - GOT_IT_MIN_SESSIONS (2026-09-26): the prototype behaves as if it were 1. */
+   - GOT_IT_MIN_SESSIONS (2026-09-26): the prototype behaves as if it were 1.
+   - STUCK_* , REST_DAYS, FOCUS_MAX_PER_DAY (stuck-learner proposal): the prototype has no stuck
+     routing and no daily focus cap, so the two that gate them are switched off. */
 import { createRequire } from 'node:module';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as TS from '../src/engine';
@@ -15,7 +17,7 @@ require('../prototype/engine.js');
 const JS = (globalThis as any).MathSprout;
 
 /* Legacy settings: the port's CONFIG values that make it behave like the prototype. */
-const LEGACY = { GOT_IT_MIN_SESSIONS: 1 };
+const LEGACY = { GOT_IT_MIN_SESSIONS: 1, STUCK_SESSIONS: Infinity, FOCUS_MAX_PER_DAY: Infinity, STUCK_ACC: 0.5, STUCK_MIN_ATTEMPTS: 4, REST_DAYS: 2 };
 const saved: Record<string, unknown> = {};
 beforeAll(() => { for (const [k, v] of Object.entries(LEGACY)) { saved[k] = (TS.CONFIG as any)[k]; (TS.CONFIG as any)[k] = v; } });
 afterAll(() => { Object.assign(TS.CONFIG, saved); });

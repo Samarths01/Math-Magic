@@ -50,7 +50,8 @@ A stuck-learner gate in `tests/gates.test.ts`, run with no `focusOverride`, a si
 
 ## 7. Open questions
 
-- **Thresholds.** All four stubs (`STUCK_SESSIONS`, `STUCK_ACC`, `REST_DAYS`, `FOCUS_MAX_PER_DAY`) are guesses until dogfood.
+- **Thresholds.** All five stubs (`STUCK_SESSIONS`, `STUCK_ACC`, `STUCK_MIN_ATTEMPTS`, `REST_DAYS`, `FOCUS_MAX_PER_DAY`) are guesses until dogfood. `STUCK_MIN_ATTEMPTS` (4) was added in the build: a session with fewer band-evidence attempts says nothing either way.
+- **Streaks.** The weak-session streak resets after it triggers and after any good session, so a skill that comes back from a rest needs `STUCK_SESSIONS` fresh weak sessions to be stuck again.
 - **Feels like a demotion?** Going to a prerequisite may read as being sent back a grade. Watch it in dogfood and tune the copy.
 - **Rested skill in the mix.** Keeping it in the interleaved slots gives spaced exposure but also more misses. The alternative is to drop it from the mix for the same days.
 - **Interaction with `FOCUS_MAX_SESSIONS`.** Kept as the general rotation; the stuck rule simply fires sooner (2 sessions instead of 4).
